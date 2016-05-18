@@ -150,12 +150,13 @@ def next(args):
     else:
         if args:
             next_user = args.split(' ')[0].replace('@', '')
+
             if next_user in users:
                 current_user = next_user
                 users.remove(current_user)
             else:
                 post_message('I don\'t recognize "@%s". Moving on...' % args)
-                current_user = users.pop()
+                next()
         else:
             current_user = users.pop()
 
