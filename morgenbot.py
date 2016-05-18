@@ -149,14 +149,17 @@ def next(args):
         done()
     else:
         if args:
+            print 'args is set'
             current_user = args.strip().split(' ')[0].replace('@', '')
             if current_user in users:
                 users.remove(current_user)
-                post_message('Removed %s. Users left: %s' % (current_user, ', '.join(users)))
+                print 'removed %s. Users left: %s' % (current_user, ', '.join(users))
             else:
+                print 'Didn\'t recognize %s' % args
                 post_message('I don\'t recognize "@%s". Moving on...' % args)
                 next(None)
         else:
+            print 'args is NOT set'
             current_user = users.pop()
 
         if skip_idle_users and current_user in idle_users:
