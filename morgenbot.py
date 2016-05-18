@@ -149,8 +149,7 @@ def next(args):
         done()
     else:
         if args:
-            next_user = args.split(' ')[0].replace('@', '')
-
+            next_user = args.strip().split(' ')[0].replace('@', '')
             if next_user in users:
                 current_user = next_user
                 users.remove(current_user)
@@ -163,6 +162,7 @@ def next(args):
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
             next()
+
         post_message('@%s, you\'re up' % current_user)
 
 def standup_time():
