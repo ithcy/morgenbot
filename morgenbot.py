@@ -148,7 +148,7 @@ def next(args):
     if len(users) == 0:
         done()
     else:
-        post_message 'args is "%s"' % args
+        post_message('args is "%s"' % args)
         if args:
             current_user = args.strip().split(' ')[0].replace('@', '')
             if current_user in users:
