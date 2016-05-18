@@ -148,6 +148,7 @@ def next(args):
     if len(users) == 0:
         done()
     else:
+        post_message('Starting with: %s' % ', '.join(users))
         if args:
             current_user = args.strip().split(' ')[0].replace('@', '')
             if current_user in users:
@@ -163,6 +164,7 @@ def next(args):
             next(None)
 
         post_message('@%s, you\'re up' % current_user)
+        post_message('Remaining: %s' % ', '.join(users))
 
 def standup_time():
     if len(time) != 2: return
