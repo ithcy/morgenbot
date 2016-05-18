@@ -148,10 +148,10 @@ def next(args):
     if len(users) == 0:
         done()
     else:
+        post_message 'args is "%s"' % args
         if args:
-            next_user = args.strip().split(' ')[0].replace('@', '')
-            if next_user in users:
-                current_user = next_user
+            current_user = args.strip().split(' ')[0].replace('@', '')
+            if current_user in users:
                 users.remove(current_user)
             else:
                 post_message('I don\'t recognize "@%s". Moving on...' % args)
