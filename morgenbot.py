@@ -80,7 +80,7 @@ def start():
         return
     time.append(datetime.datetime.now())
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
-    next()
+    next(False)
 
 def cancel():
     tabled()
@@ -155,13 +155,13 @@ def next(args):
                 users.remove(current_user)
             else:
                 post_message('I don\'t recognize "@%s". Moving on...' % args)
-                next()
+                next(False)
         else:
             current_user = users.pop()
 
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
-            next()
+            next(False)
 
         post_message('@%s, you\'re up' % current_user)
 
@@ -230,7 +230,7 @@ def ignoring():
 
 def skip():
     post_message('Skipping @%s.' % current_user)
-    next()
+    next(False)
 
 def table(topic_user, topic):
     global topics
