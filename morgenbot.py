@@ -139,16 +139,26 @@ def standup_users():
     
     return active_users
 
-def next():
+def next(args):
     global users
     global current_user
     global idle_users
     global skip_idle_users
-    
+
     if len(users) == 0:
         done()
     else:
-        current_user = users.pop()
+        if args:
+            next_user = args.split(' ')[0].replace('@', '')
+            if next_user in users:
+                current_user = next_user
+                users.remove(current_user)
+            else:
+                post_message('I don\'t recognize "@%s". Moving on...' % args)
+                current_user = users.pop()
+        else:
+            current_user = users.pop()
+
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
             next()
@@ -346,7 +356,7 @@ def main():
     elif command == 'cancel':
         cancel()
     elif command == 'next':
-        next()
+        next(args)
     elif command == 'skip':
         skip()
     elif command == 'table':
