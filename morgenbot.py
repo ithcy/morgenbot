@@ -140,7 +140,7 @@ def standup_users():
         is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
         if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
-        else if is_idle:
+        elif is_idle:
             idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
