@@ -177,7 +177,6 @@ def next(args):
                 post_message('That user is absent.')
             elif user in active_users:
                 next_user_index = users.index(user)
-        else:
         current_user = users.pop(next_user_index)
 
         if skip_idle_users and slack.users.get_presence(user_ids[current_user]).body['presence'] != 'active':
