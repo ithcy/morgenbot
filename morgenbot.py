@@ -162,21 +162,23 @@ def next(args):
     if len(users) == 0:
         done()
     else:
-        print 'Current user list: @%s' % ', @'.join(users)
-        print 'user_ids: %s' % json.dumps(user_ids)
-        print 'user_names: %s' % json.dumps(user_names)
         if args is not None and args != '':
+            print 'trying to search for %s' % args
             search_obj = re.search("^<@([^>]+)", args)
             if search_obj is not None:
                 user_id = search_obj.group(1)
+                print 'search was a hit: %s' % user_id
                 if user_id in user_names:
                     user = user_names[user_id]
+                    print 'found user id in user_names: %s = %s' % (user_id, user) 
                 else:
+                    print 'did not find user id in user_names'
                     user = None
             else:
                 user = args.strip().replace('@', '')
-            print 'Argument to next was %s' % args
-            print 'Considering starting with @%s.' % user
+                print 'search was a miss. working with %s' % user
+
+            print 'looking for @%s.' % user
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
             elif user in ignore_users:
