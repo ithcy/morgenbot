@@ -155,7 +155,8 @@ def next(user):
     else:
         post_message('Current user list: @%s' % ', @'.join(users))
         if user and user != '':
-            user = user.strip()
+            post_message('Argument to next was %s' % user)
+            user = user.strip().replace('@', '')
             post_message('Considering starting with @%s.' % user)
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
