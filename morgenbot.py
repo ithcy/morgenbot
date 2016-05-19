@@ -82,13 +82,10 @@ def start():
         post_message('But we\'ve already started!')
         return
     time.append(datetime.datetime.now())
-
     if skip_idle_users and idle_users:
         post_message('Skipping idle users: @' + ', @'.join(idle_users))
-
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
-
-    next(None)
+    next()
 
 def cancel():
     tabled()
@@ -143,8 +140,7 @@ def standup_users():
         is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
         if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
-
-        if is_idle:
+        else if is_idle:
             idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
@@ -152,25 +148,16 @@ def standup_users():
     
     return active_users
 
-def next(args):
+def next():
     global users
     global current_user
-    next_user_index = 0
-
+    
     if len(users) == 0:
         done()
     else:
-        if args:
-            next_user = args.split(' ')[0].replace('@', '')
-            if next_user in users:
-                next_user_index = users.index(next_user)
-            else:
-                post_message('I don\'t recognize "%s". Moving on...' % args)
-
-        current_user = users.pop(next_user_index)
-
+        current_user = users.pop()
         post_message('@%s, you\'re up' % current_user)
-
+        
 def standup_time():
     if len(time) != 2: return
     seconds = (time[1] - time[0]).total_seconds()
@@ -236,7 +223,7 @@ def ignoring():
 
 def skip():
     post_message('Skipping @%s.' % current_user)
-    next(None)
+    next()
 
 def table(topic_user, topic):
     global topics
@@ -342,7 +329,7 @@ def main():
     elif command == 'cancel':
         cancel()
     elif command == 'next':
-        next(args.strip())
+        next()
     elif command == 'skip':
         skip()
     elif command == 'table':
