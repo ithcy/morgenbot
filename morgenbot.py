@@ -148,7 +148,6 @@ def next(args):
     if len(users) == 0:
         done()
     else:
-        post_message('Starting with: %s' % ', '.join(users))
         if args:
             current_user = args.strip().split(' ')[0].replace('@', '')
             if current_user in users:
@@ -161,10 +160,8 @@ def next(args):
 
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
-            next(None)
-
-        post_message('@%s, you\'re up' % current_user)
-        post_message('Remaining: %s' % ', '.join(users))
+        else:
+            post_message('@%s, you\'re up' % current_user)
 
 def standup_time():
     if len(time) != 2: return
