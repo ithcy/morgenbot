@@ -169,7 +169,6 @@ def next(args):
                     user = ''
             else:
                 user = args.strip().replace('@', '')
-            print 'user: %s current_user: %s' % (user, current_user)
             if user == current_user:
                 post_message('That makes no sense.');
                 next_user_index = 0;
