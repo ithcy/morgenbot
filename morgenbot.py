@@ -160,6 +160,7 @@ def next(args):
 
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
+            next(None)
         else:
             post_message('@%s, you\'re up' % current_user)
 
