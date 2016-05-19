@@ -264,7 +264,7 @@ def later():
         post_message('We\'ll call on @%s later.' % current_user)
         users.append(current_user)
     else:
-        post_message('We can\'t call on you later. You\'re the last one.')
+        post_message('We can\'t call on @%s later. @%s is the last one left.' % (current_user, current_user))
         users.insert(current_user)
     next(None)
 
