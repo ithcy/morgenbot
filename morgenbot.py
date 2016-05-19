@@ -21,6 +21,7 @@ username = os.getenv('USERNAME', 'morgenbot')
 icon_emoji = os.getenv('ICON_EMOJI', ':coffee:')
 channel = os.getenv('CHANNEL', '#standup')
 ignore_users = os.getenv('IGNORE_USERS', '[]')
+skip_idle_users = False if os.getenv('SKIP_IDLE_USERS', 'true').lower() == 'false' else True
 
 init_greeting = os.getenv('INIT_GREETING', 'Good morning!')
 start_message = os.getenv('START_MESSAGE', 'What did you work on yesterday? What are you working on today? What, if any, are your blockers?')
@@ -35,6 +36,7 @@ time = []
 in_progress = False
 current_user = ''
 absent_users = []
+idle_users = []
 
 def post_message(text, attachments=[]):
     slack.chat.post_message(channel     = channel,
@@ -58,10 +60,12 @@ def init():
     global topics
     global time
     global in_progress
+    global idle_users
      
     if len(users) != 0:
         post_message('Looks like we have a standup already in process.')
         return
+    idle_users = []
     users = standup_users()
     topics = []
     time = []
@@ -70,11 +74,16 @@ def init():
 
 def start():
     global time
+    global users
+    global skip_idle_users
+    global idle_users
     
     if len(time) != 0:
         post_message('But we\'ve already started!')
         return
     time.append(datetime.datetime.now())
+    if skip_idle_users and idle_users:
+        post_message('Skipping idle users: @' + ', @'.join(idle_users))
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
     next()
 
@@ -100,6 +109,7 @@ def reset():
     global current_user
     
     del users[:]
+    del idle_users[:]
     del topics[:]
     del time[:]
     in_progress = False
@@ -108,6 +118,8 @@ def reset():
 def standup_users():
     global ignore_users
     global absent_users
+    global skip_idle_users
+    global idle_users
     
     ignore_users_array = eval(ignore_users)
 
@@ -125,8 +137,11 @@ def standup_users():
     for user_id in standup_users:
         user_name = slack.users.info(user_id).body['user']['name']
         is_deleted = slack.users.info(user_id).body['user']['deleted']
-        if not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
+        is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
+        if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
+        elif is_idle:
+            idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
     random.shuffle(active_users)
