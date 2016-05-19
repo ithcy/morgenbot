@@ -37,7 +37,7 @@ time = []
 in_progress = False
 current_user = ''
 absent_users = []
-idle_users = []
+user_ids = {}
 
 def post_message(text, attachments=[]):
     slack.chat.post_message(channel     = channel,
@@ -61,12 +61,10 @@ def init():
     global topics
     global time
     global in_progress
-    global idle_users
-     
+
     if len(users) != 0:
         post_message('Looks like we have a standup already in process.')
         return
-    idle_users = []
     users = standup_users()
     topics = []
     time = []
@@ -76,17 +74,13 @@ def init():
 def start():
     global time
     global users
-    global skip_idle_users
-    global idle_users
     
     if len(time) != 0:
         post_message('But we\'ve already started!')
         return
     time.append(datetime.datetime.now())
-    if skip_idle_users and idle_users:
-        post_message('Skipping idle users: @' + ', @'.join(idle_users))
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
-    next()
+    next(None)
 
 def cancel():
     tabled()
@@ -104,13 +98,14 @@ def done():
     
 def reset():
     global users
+    global user_ids
     global topics
     global time
     global in_progress
     global current_user
-    
+
     del users[:]
-    del idle_users[:]
+    del user_ids[:]
     del topics[:]
     del time[:]
     in_progress = False
@@ -119,8 +114,7 @@ def reset():
 def standup_users():
     global ignore_users
     global absent_users
-    global skip_idle_users
-    global idle_users
+    global user_ids
     
     ignore_users_array = eval(ignore_users)
 
@@ -137,33 +131,53 @@ def standup_users():
     
     for user_id in standup_users:
         user_name = slack.users.info(user_id).body['user']['name']
+        user_ids[user_name] = user_id
         is_deleted = slack.users.info(user_id).body['user']['deleted']
-        is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
-        if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
+        if not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
-        elif is_idle:
-            idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
     random.shuffle(active_users)
     
     return active_users
 
-def next():
+def next(user):
     global users
     global current_user
+    global ignore_users
+    global absent_users
+    global user_ids
+    active_users = standup_users()
+    next_user_index = 0
     
     if len(users) == 0:
         done()
     else:
-        current_user = users.pop()
-        post_message('@%s, you\'re up' % current_user)
+        user = user[1:]
+        if user:
+            if user not in active_users and user not in ignore_users and user not in absent_users:
+                post_message('I don\'t recognize that user.')
+            elif user in ignore_users:
+                post_message('I\'m already ignoring that user.')
+            elif user in absent_users:
+                post_message('That user is absent.')
+            elif user in active_users:
+                next_user_index = users.index(user)
+        current_user = users.pop(next_user_index)
+        if skip_idle_users and slack.users.get_presence(user_ids[current_user]).body['presence'] != 'active':
+            post_message('Skipping @%s (idle).' % current_user)
+            next(None)
+        else:
+            post_message('@%s, you\'re up' % current_user)
         
 def standup_time():
     if len(time) != 2: return
     seconds = (time[1] - time[0]).total_seconds()
     minutes = seconds / 60
-    post_message('That\'s everyone! Standup took us %d minutes.' % minutes)
+    if minutes < 1:
+        post_message('That\'s everyone! Standup took us %d seconds.' % seconds)
+    else:
+        post_message('That\'s everyone! Standup took us %d minutes.' % minutes)
 
 def left():
     if len(users) == 0:
@@ -224,12 +238,12 @@ def ignoring():
 
 def skip():
     post_message('Skipping @%s.' % current_user)
-    next()
+    next(None)
     
 def later():
     post_message('We\'ll call on @%s later.' % current_user)
     users.append(current_user)
-    next()
+    next(None)
 
 def table(topic_user, topic):
     global topics
@@ -340,7 +354,7 @@ def main():
     elif command == 'cancel':
         cancel()
     elif command == 'next':
-        next()
+        next(args)
     elif command == 'skip':
         skip()
     elif command == 'later':
