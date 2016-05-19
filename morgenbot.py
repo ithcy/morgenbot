@@ -156,31 +156,19 @@ def next(args):
     active_users = standup_users()
     next_user_index = 0
     
-    if not in_progress:
-        post_message('Looks like standup hasn\'t started yet. Type !start.')
-
     if len(users) == 0:
         done()
     else:
-        print 'users: @%s' % ', @'.join(users)
         if args is not None and args != '':
-            print 'args is a %s - %s' % (type(args), args.__class__)
-            print 'trying to search for %s' % args
             search_obj = re.search(ur'<@([^>]+)>', args)
             if search_obj is not None:
                 user_id = search_obj.group(1)
-                print 'search was a hit: %s' % user_id
                 if user_id in user_names:
                     user = user_names[user_id]
-                    print 'found user id in user_names: %s = %s' % (user_id, user) 
                 else:
-                    print 'did not find user id in user_names'
                     user = ''
             else:
                 user = args.strip().replace('@', '')
-                print 'search was a miss. working with %s' % user
-
-            print 'looking for %s.' % user
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
             elif user in ignore_users:
@@ -190,8 +178,6 @@ def next(args):
             elif user in active_users:
                 next_user_index = users.index(user)
         else:
-            print 'No username passed to next. Starting with @%s.' % users[0]
-
         current_user = users.pop(next_user_index)
 
         if skip_idle_users and slack.users.get_presence(user_ids[current_user]).body['presence'] != 'active':
