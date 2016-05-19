@@ -60,6 +60,7 @@ def init():
     global topics
     global time
     global in_progress
+    global idle_users
      
     if len(users) != 0:
         post_message('Looks like we have a standup already in process.')
@@ -154,21 +155,19 @@ def standup_users():
 def next(args):
     global users
     global current_user
-    global skip_idle_users
+    next_user_index = 0
 
     if len(users) == 0:
         done()
     else:
         if args:
-            args = args.strip()
             next_user = args.split(' ')[0].replace('@', '')
             if next_user in users:
-                current_user = users.pop(users.index(next_user))
+                next_user_index = users.index(next_user)
             else:
                 post_message('I don\'t recognize "%s". Moving on...' % args)
-                current_user = users.pop()
-        else:
-            current_user = users.pop()
+
+        current_user = users.pop(next_user_index)
 
         post_message('@%s, you\'re up' % current_user)
 
@@ -343,7 +342,7 @@ def main():
     elif command == 'cancel':
         cancel()
     elif command == 'next':
-        next(args)
+        next(args.strip())
     elif command == 'skip':
         skip()
     elif command == 'table':
