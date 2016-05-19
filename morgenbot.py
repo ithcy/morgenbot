@@ -166,7 +166,7 @@ def next(args):
         if args is not None and args != '':
             print 'args is a %s - %s' % (type(args), args.__class__)
             print 'trying to search for %s' % args
-            search_obj = re.search(ur'<@([^>]+>)', args)
+            search_obj = re.search(ur'<@([^>]+)>', args)
             if search_obj is not None:
                 user_id = search_obj.group(1)
                 print 'search was a hit: %s' % user_id
@@ -175,12 +175,12 @@ def next(args):
                     print 'found user id in user_names: %s = %s' % (user_id, user) 
                 else:
                     print 'did not find user id in user_names'
-                    user = None
+                    user = ''
             else:
                 user = args.strip().replace('@', '')
                 print 'search was a miss. working with %s' % user
 
-            print 'looking for @%s.' % user
+            print 'looking for %s.' % user
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
             elif user in ignore_users:
