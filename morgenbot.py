@@ -31,12 +31,12 @@ giphy = True if os.getenv('GIPHY', 'false').lower() == 'true' else False
 commands = ['standup','start','cancel','next','skip','table','left','ignore','heed','ignoring','help']
 
 users = []
+idle_users = []
 topics = []
 time = []
 in_progress = False
 current_user = ''
 absent_users = []
-idle_users = []
 
 def post_message(text, attachments=[]):
     slack.chat.post_message(channel     = channel,
@@ -57,6 +57,7 @@ def get_channel(id):
                             
 def init():
     global users
+    global idle_users
     global topics
     global time
     global in_progress
@@ -64,8 +65,8 @@ def init():
     if len(users) != 0:
         post_message('Looks like we have a standup already in process.')
         return
-    idle_users = []
     users = standup_users()
+    idle_users = idle_users()
     topics = []
     time = []
     in_progress = True
@@ -73,21 +74,13 @@ def init():
 
 def start():
     global time
-    global users
-    global skip_idle_users
-    global idle_users
     
     if len(time) != 0:
         post_message('But we\'ve already started!')
         return
     time.append(datetime.datetime.now())
-
-    if skip_idle_users and idle_users:
-        post_message('Skipping idle users: @' + ', @'.join(idle_users))
-
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
-
-    next(None)
+    next()
 
 def cancel():
     tabled()
@@ -105,6 +98,7 @@ def done():
     
 def reset():
     global users
+    global idle_users
     global topics
     global time
     global in_progress
@@ -120,8 +114,6 @@ def reset():
 def standup_users():
     global ignore_users
     global absent_users
-    global skip_idle_users
-    global idle_users
     
     ignore_users_array = eval(ignore_users)
 
@@ -139,38 +131,29 @@ def standup_users():
     for user_id in standup_users:
         user_name = slack.users.info(user_id).body['user']['name']
         is_deleted = slack.users.info(user_id).body['user']['deleted']
-        is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
-        if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
+        if not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
-
-        if is_idle:
-            idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
     random.shuffle(active_users)
     
     return active_users
 
-def next(args):
+def next():
     global users
     global current_user
+    global idle_users
     global skip_idle_users
-
+    
     if len(users) == 0:
         done()
     else:
-        if args:
-            args = args.strip()
-            next_user = args.split(' ')[0].replace('@', '')
-            if next_user in users:
-                current_user = users.pop(users.index(next_user))
-            else:
-                post_message('I don\'t recognize "%s". Moving on...' % args)
-                current_user = users.pop()
+        current_user = users.pop()
+        if skip_idle_users and current_user in idle_users:
+            post_message('Skipping @%s (idle)' % current_user)
+            next()
         else:
-            current_user = users.pop()
-
-        post_message('@%s, you\'re up' % current_user)
+            post_message('@%s, you\'re up' % current_user)
 
 def standup_time():
     if len(time) != 2: return
@@ -237,7 +220,7 @@ def ignoring():
 
 def skip():
     post_message('Skipping @%s.' % current_user)
-    next(None)
+    next()
 
 def table(topic_user, topic):
     global topics
@@ -278,6 +261,26 @@ def giphy(text):
         }]
     
         post_message('Not sure what "%s" is.' % text, json.dumps(attachments))
+
+def idle_users():
+    idle_users = []
+    channel_id = ''
+    channel_name = channel.replace('#', '') # for some reason we skip the # in this API call
+    all_channels = slack.channels.list(1) # 1 means we skip any archived rooms
+
+    for one_channel in all_channels.body['channels']:
+        if one_channel['name'] == channel_name:
+            channel_id = one_channel['id']
+
+    standup_room = slack.channels.info(channel_id).body['channel']
+    standup_users = standup_room['members']
+
+    for user_id in standup_users:
+        user_name = slack.users.info(user_id).body['user']['name']
+        if slack.users.get_presence(user_id).body['presence'] != 'active':
+            idle_users.append(user_name)
+
+    return idle_users
 
 def help(topic=''):
     if topic == '':
@@ -343,7 +346,7 @@ def main():
     elif command == 'cancel':
         cancel()
     elif command == 'next':
-        next(args)
+        next()
     elif command == 'skip':
         skip()
     elif command == 'table':
