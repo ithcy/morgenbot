@@ -177,8 +177,8 @@ def next(args):
                 post_message('That user is absent.')
             elif user in active_users:
                 next_user_index = users.index(user)
-                if next_user_index == users.index(current_user):
-                    post_message 'That makes no sense.';
+                if user == current_user:
+                    post_message('That makes no sense.');
                     next_user_index = 0;
         current_user = users.pop(next_user_index)
 
