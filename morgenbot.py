@@ -38,6 +38,7 @@ in_progress = False
 current_user = ''
 absent_users = []
 user_ids = {}
+user_names = {}
 
 def post_message(text, attachments=[]):
     slack.chat.post_message(channel     = channel,
@@ -115,6 +116,7 @@ def standup_users():
     global ignore_users
     global absent_users
     global user_ids
+    global user_names
     
     ignore_users_array = eval(ignore_users)
 
@@ -132,6 +134,7 @@ def standup_users():
     for user_id in standup_users:
         user_name = slack.users.info(user_id).body['user']['name']
         user_ids[user_name] = user_id
+        user_names[user_id] = user_name
         is_deleted = slack.users.info(user_id).body['user']['deleted']
         if not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
@@ -147,16 +150,28 @@ def next(args):
     global ignore_users
     global absent_users
     global user_ids
+    global user_names
     active_users = standup_users()
     next_user_index = 0
     
+    if not in_progress:
+        post_message('Looks like standup hasn\'t started yet. Type !start.')
+
     if len(users) == 0:
         done()
     else:
         post_message('Current user list: @%s' % ', @'.join(users))
         if args is not None and args != '':
+            search_obj = re.search("^<@([^>]+)", args)
+            if search_obj is not None:
+                user_id = search_obj.group(1)
+                if user_id in user_names:
+                    user = user_names[user_id]
+                else:
+                    user = None
+            else:
+                user = args.strip().replace('@', '')
             post_message('Argument to next was %s' % args)
-            user = args.strip().replace('@', '')
             post_message('Considering starting with @%s.' % user)
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
