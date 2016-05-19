@@ -256,11 +256,13 @@ def skip():
     next(None)
     
 def later():
+    global users
     if len(users) > 1:
         post_message('We\'ll call on @%s later.' % current_user)
+        users.append(current_user)
     else:
         post_message('We can\'t call on you later. You\'re the last one.' % current_user)
-    users.append(current_user)
+        users.insert(current_user)
     next(None)
 
 def table(topic_user, topic):
