@@ -36,6 +36,7 @@ time = []
 in_progress = False
 current_user = ''
 absent_users = []
+idle_users = []
 
 def post_message(text, attachments=[]):
     slack.chat.post_message(channel     = channel,
@@ -72,11 +73,16 @@ def init():
 def start():
     global time
     global users
+    global skip_idle_users
+    global idle_users
     
     if len(time) != 0:
         post_message('But we\'ve already started!')
         return
     time.append(datetime.datetime.now())
+
+    if skip_idle_users and idle_users:
+        post_message('Skipping idle users: @' + ', @'.join(idle_users))
 
     post_message('Let\'s get started! %s\nWhen you\'re done, please type !next' % start_message)
 
@@ -113,6 +119,7 @@ def standup_users():
     global ignore_users
     global absent_users
     global skip_idle_users
+    global idle_users
     
     ignore_users_array = eval(ignore_users)
 
@@ -133,6 +140,9 @@ def standup_users():
         is_idle = skip_idle_users and slack.users.get_presence(user_id).body['presence'] != 'active'
         if not is_idle and not is_deleted and user_name not in ignore_users_array and user_name not in absent_users:
             active_users.append(user_name)
+
+        if is_idle:
+            idle_users.append(user_name)
             
     # don't forget to shuffle so we don't go in the same order every day!
     random.shuffle(active_users)
