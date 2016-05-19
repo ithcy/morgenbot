@@ -164,10 +164,7 @@ def next(args):
     else:
         print 'users: @%s' % ', @'.join(users)
         if args is not None and args != '':
-            if args is str:
-                print 'args is a string'
-            else:
-                print 'args is not a string'
+            print 'args is a %s - %s' % (type(args), args.__class__)
             print 'trying to search for %s' % args
             search_obj = re.search("^<@([^>]+)", args)
             if search_obj is not None:
