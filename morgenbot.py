@@ -162,6 +162,7 @@ def next(args):
     if len(users) == 0:
         done()
     else:
+        print 'users: @%s' % ', @'.join(users)
         if args is not None and args != '':
             if args is str:
                 print 'args is a string'
