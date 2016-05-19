@@ -154,7 +154,7 @@ def next(args):
         done()
     else:
         post_message('Current user list: @%s' % ', @'.join(users))
-        if args != '':
+        if args is not None and args != '':
             post_message('Argument to next was %s' % args)
             user = args.strip().replace('@', '')
             post_message('Considering starting with @%s.' % user)
