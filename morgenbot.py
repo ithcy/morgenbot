@@ -163,8 +163,8 @@ def next(args):
         done()
     else:
         print 'Current user list: @%s' % ', @'.join(users)
-        print 'user_ids: %s' % json_dumps(user_ids)
-        print 'user_names: %s' % json_dumps(user_names)
+        print 'user_ids: %s' % json.dumps(user_ids)
+        print 'user_names: %s' % json.dumps(user_names)
         if args is not None and args != '':
             search_obj = re.search("^<@([^>]+)", args)
             if search_obj is not None:
