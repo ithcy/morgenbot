@@ -100,6 +100,7 @@ def done():
 def reset():
     global users
     global user_ids
+    global user_names
     global topics
     global time
     global in_progress
@@ -107,6 +108,7 @@ def reset():
 
     del users[:]
     del user_ids[:]
+    del user_names[:]
     del topics[:]
     del time[:]
     in_progress = False
@@ -160,7 +162,7 @@ def next(args):
     if len(users) == 0:
         done()
     else:
-        post_message('Current user list: @%s' % ', @'.join(users))
+        print 'Current user list: @%s' % ', @'.join(users)
         if args is not None and args != '':
             search_obj = re.search("^<@([^>]+)", args)
             if search_obj is not None:
@@ -171,8 +173,8 @@ def next(args):
                     user = None
             else:
                 user = args.strip().replace('@', '')
-            post_message('Argument to next was %s' % args)
-            post_message('Considering starting with @%s.' % user)
+            print 'Argument to next was %s' % args
+            print 'Considering starting with @%s.' % user
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
             elif user in ignore_users:
@@ -182,7 +184,7 @@ def next(args):
             elif user in active_users:
                 next_user_index = users.index(user)
         else:
-            post_message('No username passed to next. Starting with @%s.' % users[0])
+            print 'No username passed to next. Starting with @%s.' % users[0]
 
         current_user = users.pop(next_user_index)
 
