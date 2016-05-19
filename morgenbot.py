@@ -151,16 +151,13 @@ def next(args):
         if args:
             current_user = args.strip().split(' ')[0].replace('@', '')
             if current_user in users:
-                users.remove(current_user)
-            else:
-                post_message('I don\'t recognize "@%s". Moving on...' % args)
-                current_user = users.pop()
-        else:
-            current_user = users.pop()
+                users.insert(0, users.pop(users.index(current_user)))
+
+        current_user = users.pop()
 
         if skip_idle_users and current_user in idle_users:
             post_message('Skipping @%s (idle)' % current_user)
-            if users:
+            if len(users) != 0:
                 next(None)
         else:
             post_message('@%s, you\'re up' % current_user)
