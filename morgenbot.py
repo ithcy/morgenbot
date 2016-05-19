@@ -141,7 +141,7 @@ def standup_users():
     
     return active_users
 
-def next(user):
+def next(args):
     global users
     global current_user
     global ignore_users
@@ -154,9 +154,9 @@ def next(user):
         done()
     else:
         post_message('Current user list: @%s' % ', @'.join(users))
-        if user and user != '':
-            post_message('Argument to next was %s' % user)
-            user = user.strip().replace('@', '')
+        if args != '':
+            post_message('Argument to next was %s' % args)
+            user = args.strip().replace('@', '')
             post_message('Considering starting with @%s.' % user)
             if user not in active_users and user not in ignore_users and user not in absent_users:
                 post_message('I don\'t recognize that user.')
