@@ -166,7 +166,7 @@ def next(args):
         if args is not None and args != '':
             print 'args is a %s - %s' % (type(args), args.__class__)
             print 'trying to search for %s' % args
-            search_obj = re.search(ur'^<@([^>]+)', args)
+            search_obj = re.search(ur'<@([^>]+>)', args)
             if search_obj is not None:
                 user_id = search_obj.group(1)
                 print 'search was a hit: %s' % user_id
