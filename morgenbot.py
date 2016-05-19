@@ -153,20 +153,21 @@ def next(user):
     if len(users) == 0:
         done()
     else:
-        user = user[1:]
         post_message('Current user list: @%s' % ', @'.join(users))
-        if user:
-            post_message('Considering starting with @%s.' % user)
-            if user not in active_users and user not in ignore_users and user not in absent_users:
-                post_message('I don\'t recognize that user.')
-            elif user in ignore_users:
-                post_message('I\'m already ignoring that user.')
-            elif user in absent_users:
-                post_message('That user is absent.')
-            elif user in active_users:
-                next_user_index = users.index(user)
+        if user != '':
+            user = user.strip().split()[0];
+            if user:
+                post_message('Considering starting with @%s.' % user)
+                if user not in active_users and user not in ignore_users and user not in absent_users:
+                    post_message('I don\'t recognize that user.')
+                elif user in ignore_users:
+                    post_message('I\'m already ignoring that user.')
+                elif user in absent_users:
+                    post_message('That user is absent.')
+                elif user in active_users:
+                    next_user_index = users.index(user)
         else:
-            post_message('No user argument passed to next().')
+            post_message('No username passed to next. Starting with @%s.' % users[0])
 
         current_user = users.pop(next_user_index)
 
