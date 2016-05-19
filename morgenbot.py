@@ -64,6 +64,7 @@ def init():
     if len(users) != 0:
         post_message('Looks like we have a standup already in process.')
         return
+    idle_users = []
     users = standup_users()
     topics = []
     time = []
@@ -110,6 +111,7 @@ def reset():
     global current_user
     
     del users[:]
+    del idle_users[:]
     del topics[:]
     del time[:]
     in_progress = False
