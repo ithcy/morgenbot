@@ -163,6 +163,10 @@ def next(args):
         done()
     else:
         if args is not None and args != '':
+            if args is str:
+                print 'args is a string'
+            else:
+                print 'args is not a string'
             print 'trying to search for %s' % args
             search_obj = re.search("^<@([^>]+)", args)
             if search_obj is not None:
